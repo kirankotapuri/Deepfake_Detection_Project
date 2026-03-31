@@ -1,0 +1,55 @@
+# Deepfake Detection Pipeline Configuration
+
+# ── Dataset paths ──────────────────────────────────────────────────────────────
+# Raw / standardized dataset roots
+dataset:
+  # Standard flat structure (output of standardize_datasets.py)
+  celebdf_dir:  "dataset/CelebDF"
+  dfdc_dir:     "dataset/DFDC"
+  uadfv_dir:    "dataset/UADFV"
+
+  # 1/4-sized subsets (output of prepare_all_datasets.py)
+  # CelebDF quarter — used for training (70/15/15 split)
+  celebdf_quarter: "dataset/CelebDF_quarter"
+  # DFDC quarter — test only
+  dfdc_quarter:    "dataset/DFDC_quarter"
+  # UADFV quarter — used for training (70/15/15 split)
+  uadfv_quarter:   "dataset/UADFV_quarter"
+
+  # Default train / val / test dirs (used by --mode train and --mode evaluate)
+  train_dir: "dataset/CelebDF_quarter/train"
+  val_dir:   "dataset/CelebDF_quarter/val"
+  test_dir:  "dataset/CelebDF_quarter/test"
+
+  # Legacy path kept for backward compatibility
+  celebdf_test_dir: "dataset/Celeb_V2/Test"
+
+  image_size: 224
+
+# ── Preprocessing ──────────────────────────────────────────────────────────────
+preprocessing:
+  frame_rate: 1
+  max_frames_per_video: 100
+  face_size: 224
+
+# ── Model ──────────────────────────────────────────────────────────────────────
+model:
+  backbone: "resnet"   # resnet | clip | dinov2
+  num_classes: 2
+
+# ── Training  (GPU-safe settings) ─────────────────────────────────────────────
+training:
+  batch_size: 16          # safe for 8-12 GB VRAM (T4, RTX 3060, etc.)
+  num_epochs: 10          # enough for frozen-feature linear probing
+  learning_rate: 0.0001   # lower LR prevents overshooting on small datasets
+  num_workers: 2          # 2 background workers; set 0 on Windows if errors occur
+  balance_classes: true   # use WeightedRandomSampler to handle class imbalance
+  augment: true           # apply train-time augmentation
+  early_stopping_patience: 5
+
+# ── Paths ──────────────────────────────────────────────────────────────────────
+paths:
+  results_dir:      "results"
+  checkpoints_dir:  "checkpoints"
+  gradcam_output:   "results/gradcam_images"
+  diffusion_dir:    "dataset/diffusion_faces"   # Phase 5 — add images here

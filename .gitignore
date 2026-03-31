@@ -1,0 +1,140 @@
+# ==============================
+# EMBEDDED / OTHER GIT REPOS
+# ==============================
+Deep-Fake-Detection/
+Deep-Fake-Detection
+
+# ==============================
+# DATASETS (VERY LARGE — ~46 GB)
+# ==============================
+dataset/
+datasets/
+data/
+raw_data/
+processed_data/
+videos/
+frames/
+images/
+faces/
+
+# Per-dataset folders inside dataset/
+dataset/CelebDF/
+dataset/CelebDF_quarter/
+dataset/DFDC/
+dataset/DFDC_quarter/
+dataset/UADFV/
+dataset/UADFV_quarter/
+dataset/Celeb_V2/
+dataset/uadfv/
+dataset/diffusion_faces/
+dataset/dataset_quarter/
+
+# ==============================
+# MODEL CHECKPOINTS & WEIGHTS
+# ==============================
+checkpoints/
+weights/
+saved_models/
+*.pt
+*.pth
+*.h5
+*.ckpt
+*.onnx
+*.bin
+
+# ==============================
+# OUTPUTS / RESULTS
+# ==============================
+results/
+outputs/
+predictions/
+runs/
+experiments/
+
+# Keep results structure but ignore generated files
+results/*.csv
+results/*.txt
+results/*.png
+results/gradcam_images/
+
+# ==============================
+# LOGS
+# ==============================
+logs/
+*.log
+
+# ==============================
+# LARGE MEDIA & ARCHIVE FILES
+# ==============================
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.zip
+*.tar
+*.tar.gz
+*.gz
+*.rar
+*.7z
+
+# ==============================
+# LARGE NUMERIC / BINARY DATA
+# ==============================
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.hdf5
+
+# ==============================
+# PYTHON CACHE
+# ==============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ==============================
+# VIRTUAL ENVIRONMENT
+# ==============================
+venv/
+.venv/
+env/
+.env/
+ENV/
+conda_env/
+.conda/
+
+# ==============================
+# JUPYTER NOTEBOOKS
+# ==============================
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ==============================
+# OS / EDITOR
+# ==============================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/settings.json
+
+# ==============================
+# ENVIRONMENT VARIABLES
+# ==============================
+.env
+.envrc
+*.env
+
+# ==============================
+# KEEP SMALL SAMPLE / CONFIG FILES
+# ==============================
+!sample_data/
+!config/
+!config/*.yaml
+!requirements.txt
