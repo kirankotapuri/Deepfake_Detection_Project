@@ -459,6 +459,81 @@ def experiment2(records: list[dict]) -> list[tuple]:
 
 
 # ===========================================================================
+# Experiment 3 — UADFV → StableDiffusion
+# ===========================================================================
+
+def experiment3(records: list[dict]) -> list[tuple]:
+    """
+    Load UADFV-trained checkpoints, evaluate on diffusion_quarter/test.
+    Returns list of (y_true, y_prob, label) for combined ROC.
+    """
+    log.info("")
+    log.info("=" * 70)
+    log.info("EXPERIMENT 3 — Train: UADFV  |  Test: StableDiffusion")
+    log.info("=" * 70)
+
+    test_dir   = DIFFUSION_QUARTER / "test"
+    roc_curves = []
+
+    for backbone in ("ResNet50", "CLIP", "DINOv2"):
+        ckpt = CROSS_CKPT_DIR / f"uadfv_{BACKBONE_CONFIGS[backbone]['key']}.pt"
+        if not ckpt.exists():
+            log.warning(f"  Checkpoint not found: {ckpt} — skipping {backbone}")
+            continue
+
+        log.info(f"\n  [{backbone}]  Loading {ckpt.name} ...")
+        extractor, classifier = load_classifier(backbone, ckpt, DEVICE)
+
+        y_true, y_pred, y_prob = run_inference(extractor, classifier, test_dir, DEVICE)
+        if len(y_true) == 0:
+            continue
+
+        result = generate_eval_outputs(
+            y_true, y_pred, y_prob,
+            backbone=backbone,
+            experiment="UADFV->StableDiffusion",
+            prefix="exp3_uadfv_sd",
+        )
+        log.info(
+            f"    Acc={result['accuracy']:.4f}  "
+            f"P={result['precision']:.4f}  R={result['recall']:.4f}  "
+            f"F1={result['f1']:.4f}  AUC={result['auc']:.4f}"
+        )
+
+        records.append({
+            "Experiment":    "UADFV->StableDiffusion",
+            "Train Dataset": "UADFV",
+            "Test Dataset":  "StableDiffusion",
+            "Backbone":      backbone,
+            "Accuracy":      result["accuracy"],
+            "Precision":     result["precision"],
+            "Recall":        result["recall"],
+            "F1":            result["f1"],
+            "AUC":           result["auc"],
+        })
+
+        roc_curves.append((y_true, y_prob, backbone))
+
+        # GradCAM only for ResNet50
+        if backbone == "ResNet50":
+            run_gradcam(extractor, classifier, test_dir, prefix="exp3")
+
+        # t-SNE for all
+        run_tsne(extractor, backbone, test_dir, prefix="exp3")
+
+    # Combined ROC
+    if roc_curves:
+        plot_roc_curves_multi(
+            roc_curves,
+            str(RESULTS_DIR / "roc_exp3_uadfv_sd_all_backbones.png"),
+            title="ROC — UADFV trained -> StableDiffusion test (all backbones)",
+        )
+        log.info(f"\n  Combined ROC saved: roc_exp3_uadfv_sd_all_backbones.png")
+
+    return roc_curves
+
+
+# ===========================================================================
 # Step 8 — Save final CSV + print table
 # ===========================================================================
 
@@ -504,7 +579,7 @@ def save_results(records: list[dict]):
         "diffusion_quarter": str(DIFFUSION_QUARTER),
         "celebdf_quarter": str(CELEBDF_QUARTER),
         "backbones": list(BACKBONE_CONFIGS.keys()),
-        "experiments": ["CelebDF→StableDiffusion", "StableDiffusion→CelebDF"],
+        "experiments": ["CelebDF->StableDiffusion", "StableDiffusion->CelebDF", "UADFV->StableDiffusion"],
     }
     with open(RESULTS_DIR / "experiment_config.json", "w") as f:
         import json
@@ -520,6 +595,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Diffusion detection experiments")
     parser.add_argument("--skip-exp2", action="store_true",
                         help="Skip Experiment 2 (no training on SD data)")
+    parser.add_argument("--skip-exp3", action="store_true",
+                        help="Skip Experiment 3 (UADFV -> StableDiffusion)")
     args = parser.parse_args()
 
     # Verify data is prepared
@@ -554,6 +631,12 @@ if __name__ == "__main__":
         experiment2(records)
     else:
         log.info("\n  [Experiment 2 skipped via --skip-exp2]")
+
+    # ── Experiment 3: UADFV → StableDiffusion ────────────────────────────
+    if not args.skip_exp3:
+        experiment3(records)
+    else:
+        log.info("\n  [Experiment 3 skipped via --skip-exp3]")
 
     # ── Save all results ──────────────────────────────────────────────────
     save_results(records)
