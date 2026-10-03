@@ -2,9 +2,18 @@
   "name": "deepfake-detection-project",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "web"
+  ],
   "scripts": {
     "dev": "npm --prefix web run dev",
     "build": "npm --prefix web run build",
     "start": "npm --prefix web run start"
+  },
+  "dependencies": {
+    "lucide-react": "^1.51.0",
+    "next": "16.3.8",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   }
 }
